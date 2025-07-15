@@ -1,76 +1,49 @@
 {
-  description = "quran-companion flake (with qttools fix)";
+  description = "Quran Companion AppImage wrapper";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-  };
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs { inherit system; };
-        qt6 = pkgs.qt6;
-      in
-      {
-        packages.default = pkgs.stdenv.mkDerivation {
-          pname = "quran-companion";
-          version = "unstable";
+  outputs = { self, nixpkgs }:
+    let
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
+      appimageUrl = "https://github.com/0xzer0x/quran-companion/releases/download/v1.3.2/Quran_Companion-1.3.2-x86_64.AppImage";
+      appimageSha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # replace with real sha256
+    in
+    {
+      packages.${system}.quranCompanionAppImage = pkgs.stdenv.mkDerivation {
+        pname = "quran-companion-appimage";
+        version = "1.3.2";
 
-          src = self;
-
-          nativeBuildInputs = with pkgs; [
-            cmake
-            ninja
-            qt6.wrapQtAppsHook
-            qt6.qttools   # <--- ✨ this is key: tools like lrelease & lupdate
-          ];
-
-          buildInputs = with qt6; [
-            qtbase
-            qtimageformats
-            qtsvg
-            qtmultimedia
-          ];
-
-          cmakeFlags = [
-            "-DCMAKE_BUILD_TYPE=Release"
-          ];
-
-          configurePhase = ''
-            cmake -G Ninja -S . -B build -DCMAKE_BUILD_TYPE=Release
-          '';
-
-          buildPhase = ''
-            ninja -C build
-          '';
-
-          installPhase = ''
-            mkdir -p $out/bin
-            cp build/quran-companion $out/bin/
-          '';
+        src = pkgs.fetchurl {
+          url = appimageUrl;
+          sha256 = appimageSha256;
         };
 
-        defaultPackage = self.packages.${system}.default;
+        buildInputs = [ pkgs.makeWrapper ];
 
-        apps.default = flake-utils.lib.mkApp {
-          drv = self.packages.${system}.default;
-          name = "quran-companion";
-        };
+        installPhase = ''
+          mkdir -p $out/bin
+          cp $src $out/bin/quran-companion.AppImage
+          chmod +x $out/bin/quran-companion.AppImage
+          wrapProgram $out/bin/quran-companion.AppImage --set QT_QPA_PLATFORM xcb
+          ln -s $out/bin/quran-companion.AppImage $out/bin/quran-companion
+        '';
 
-        devShells.default = pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [
-            cmake
-            ninja
-            qt6.wrapQtAppsHook
-            qt6.qttools
-          ];
-          buildInputs = with qt6; [
-            qtbase
-            qtimageformats
-            qtsvg
-            qtmultimedia
-          ];
+        meta = with pkgs.lib; {
+          description = "Quran Companion AppImage launcher";
+          homepage = "https://github.com/0xzer0x/quran-companion";
+          license = licenses.mit; # adjust if needed
+          maintainers = with maintainers; [ ];
+          platforms = platforms.linux;
         };
-      });
+      };
+
+      defaultPackage.${system} = self.packages.${system}.quranCompanionAppImage;
+
+      defaultApp.${system} = {
+        type = "app";
+        program = "${self.packages.${system}.quranCompanionAppImage}/bin/quran-companion";
+      };
+    };
 }
