@@ -1,8 +1,8 @@
 {
   description = "Flake for Quran Companion (Qt6/C++ project)";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+  inputs = {    
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
