@@ -14,14 +14,16 @@
       packages.${system}.quranCompanionAppImage = pkgs.stdenv.mkDerivation {
         pname = "quran-companion-appimage";
         version = "1.3.2";
-
+      
         src = pkgs.fetchurl {
           url = appimageUrl;
           sha256 = appimageSha256;
         };
-
+      
+        unpackPhase = ":";  # skip unpacking since it's an executable
+      
         buildInputs = [ pkgs.makeWrapper ];
-
+      
         installPhase = ''
           mkdir -p $out/bin
           cp $src $out/bin/quran-companion.AppImage
@@ -29,15 +31,16 @@
           wrapProgram $out/bin/quran-companion.AppImage --set QT_QPA_PLATFORM xcb
           ln -s $out/bin/quran-companion.AppImage $out/bin/quran-companion
         '';
-
+      
         meta = with pkgs.lib; {
           description = "Quran Companion AppImage launcher";
           homepage = "https://github.com/0xzer0x/quran-companion";
-          license = licenses.mit; # adjust if needed
+          license = licenses.mit;
           maintainers = with maintainers; [ ];
           platforms = platforms.linux;
         };
       };
+
 
       defaultPackage.${system} = self.packages.${system}.quranCompanionAppImage;
 
