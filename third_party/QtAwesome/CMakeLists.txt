@@ -140,4 +140,4 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
 	set(CPACK_GENERATOR "TGZ")
 endif()
 
-include(CPack)
+# include(CPack)
