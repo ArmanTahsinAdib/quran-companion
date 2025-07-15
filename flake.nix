@@ -1,8 +1,8 @@
 {
-  description = "Flake for Quran Companion (Qt6/C++ project)";
+  description = "quran-companion flake (fork with Nix build)";
 
-  inputs = {    
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -10,24 +10,44 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-        qt = pkgs.qt6.full;
+        qt6 = pkgs.qt6;
       in
       {
         packages.default = pkgs.stdenv.mkDerivation {
           pname = "quran-companion";
           version = "unstable";
-          src = ./.;
-          nativeBuildInputs = [ pkgs.cmake pkgs.pkg-config qt ];
-          buildInputs = [ qt ];
+
+          src = self;  # because the flake.nix lives in your fork
+
+          nativeBuildInputs = with pkgs; [
+            cmake
+            ninja  # usually better than make
+            qt6.wrapQtAppsHook
+          ];
+
+          buildInputs = with qt6; [
+            qtbase
+            qtimageformats
+            qtsvg
+            qtmultimedia
+            qttools
+          ];
+
           cmakeFlags = [
             "-DCMAKE_BUILD_TYPE=Release"
           ];
+
+          installPhase = ''
+            mkdir -p $out/bin
+            cp quran-companion $out/bin/
+          '';
         };
 
-        devShells.default = pkgs.mkShell {
-          nativeBuildInputs = [ pkgs.cmake pkgs.pkg-config qt ];
-          buildInputs = [ qt ];
+        defaultPackage = self.packages.${system}.default;
+
+        apps.default = flake-utils.lib.mkApp {
+          drv = self.packages.${system}.default;
+          name = "quran-companion";
         };
-      }
-    );
+      });
 }
