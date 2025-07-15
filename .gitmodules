@@ -1,3 +1,0 @@
-[submodule "third_party/QtAwesome"]
-	path = third_party/QtAwesome
-	url = https://github.com/gamecreature/QtAwesome.git
