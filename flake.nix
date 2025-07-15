@@ -19,19 +19,20 @@
 
           src = self;  # because the flake.nix lives in your fork
 
-          nativeBuildInputs = with pkgs; [
-            cmake
-            ninja  # usually better than make
-            qt6.wrapQtAppsHook
-          ];
+        nativeBuildInputs = with pkgs; [
+          cmake
+          ninja
+          qt6.wrapQtAppsHook
+          qt6.qttools  # add here
+        ];
 
-          buildInputs = with qt6; [
-            qtbase
-            qtimageformats
-            qtsvg
-            qtmultimedia
-            qttools
-          ];
+       buildInputs = with qt6; [
+         qtbase
+         qtimageformats
+         qtsvg
+         qtmultimedia
+        ];
+
 
           cmakeFlags = [
             "-DCMAKE_BUILD_TYPE=Release"
