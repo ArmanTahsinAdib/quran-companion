@@ -8,7 +8,7 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       appimageUrl = "https://github.com/0xzer0x/quran-companion/releases/download/v1.3.2/Quran_Companion-1.3.2-x86_64.AppImage";
-      appimageSha256 = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="; # replace with real sha256
+      appimageSha256 = "0qalh2pp00x9kcp2yvk2l3rwki7nkmhvrixbv9a8k5c1b392yq2y"; # replace with real sha256
     in
     {
       packages.${system}.quranCompanionAppImage = pkgs.stdenv.mkDerivation {
